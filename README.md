@@ -16,12 +16,15 @@ foundation/
 ├── foundation0/                     # 环境搭建 / Git 与 Markdown / Hello World / OI
 │   ├── assignment2-markdown/        # 作业 2：crazy-day.md 与 Git 操作截图
 │   ├── assignment3-hello-world/     # 作业 3：Hello World
-│   └── assignment4-oi/              # 作业 4：洛谷与 AtCoder 五题
+│   ├── assignment4-oi/              # 作业 4：洛谷与 AtCoder 五题
+│   └── bonus/                       # Bonus：13 个 Python 小程序
 └── foundation1/                     # 语法基础与简单面向对象
     ├── docs/                        # 文档 1：Python 语法笔记 / 文档 2：终端使用
     ├── assignment1-nabiya/          # 作业 1：娜比娅偷吃事件
-    ├── assignment2-campus-if-love/  # 作业 2：校园 if 恋
-    └── assignment3-pokemon/         # 作业 3：宝可梦对战
+    ├── assignment2-campus-if-love/  # 作业 2：校园 if 恋（含存读档 Bonus）
+    ├── assignment3-pokemon/         # 作业 3：宝可梦对战
+    ├── assignment4-sanguosha/       # 作业 4：三国杀 demo
+    └── bonus-cs61a/                 # Bonus：CS61A 全部 hw/lab/hog + 笔记 + 配环境文档
 ```
 
 ## 完成情况
@@ -34,7 +37,7 @@ foundation/
 | 作业 2 | Git 基础使用与第一份 Markdown | 已完成 |
 | 作业 3 | Hello World | 已完成 |
 | 作业 4 | OI 五题 | 已完成 |
-| Bonus | Python 小程序 13 题 | 未做（可选） |
+| Bonus | Python 小程序 13 题 | 已完成 |
 
 ### Foundation 1
 
@@ -43,12 +46,12 @@ foundation/
 | 文档 1 | Python 语法与编程技巧笔记 | 已完成 |
 | 文档 2 | 终端的基本使用 | 已完成 |
 | 作业 1 | 娜比娅偷吃事件（必做） | 已完成 |
-| 作业 2 | 校园 if 恋 | 已完成 |
+| 作业 2 | 校园 if 恋（含存读档 Bonus） | 已完成 |
 | 作业 3 | 宝可梦对战 | 已完成 |
-| 作业 4 | 好玩的东西 | 未做（选做，本轮不做） |
-| Bonus | CS61A | 未做（可选） |
+| 作业 4 | 三国杀 demo（16 武将） | 已完成 |
+| Bonus | CS61A（hw01-10 / lab00-12 / hog） | 已完成 |
 
-> Foundation 1 的作业 2 - 4 要求任选两个完成，本仓库选择作业 2 与作业 3。
+> Foundation 1 的作业 2 - 4 要求任选两个完成，本仓库三个都做了。
 
 ## 快速运行
 
