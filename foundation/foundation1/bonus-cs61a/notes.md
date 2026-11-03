@@ -640,3 +640,58 @@ Hog 是第一个完整项目，12 个问题串起前三周的全部概念。
 
 锁定测试是 ok 的「先答题再解锁」机制，需要人工逐条预测输出，
 本仓库未逐条解锁，但对应代码都通过了文件内 doctest 与手工核对。
+
+## 十五、四个大项目复盘
+
+CS61A 的四个项目刚好覆盖四种难度与主题，全部实现并用官方锁定测试验证：
+
+| 项目 | 主题 | 规模 | 结果 |
+| --- | --- | --- | --- |
+| Hog | 骰子游戏，函数与高阶函数 | 12 题 | 66/66 |
+| Cats | 打字测速，递归与数据抽象 | 10 题 | 66/66 |
+| Ants | 蚂蚁塔防，面向对象与继承 | 12 题（含 2 个附加） | 80/80 |
+| Scheme | 解释器，求值/环境/尾递归 | 20 题 | 48/48 |
+
+### Hog：把「规则」翻译成「函数」
+
+Hog 的核心是把一条条规则拆成小函数：`roll_dice` 管 Sow Sad、`boar_brawl` 管
+掷 0 骰的得分、`sus_update` 在 `simple_update` 上套一层 Sus Fuss。
+`play` 则是状态机：谁行动、策略返回几颗骰子、`update` 更新分数、翻面。
+后面所有「策略函数」都是 `(score, opponent_score) -> num_rolls` 的闭包。
+
+### Cats：递归与抽象层
+
+`feline_fixes` 与 `minimum_mewtations` 是两道递归题，后者就是编辑距离：
+替换/插入/删除三条分支取最小，`limit` 用来剪枝。
+`report_progress`、`time_per_word`、`fastest_words` 则靠 `match` 这层数据抽象
+（字典 + 选择器函数）把「词表」和「计时」隔开。
+
+### Ants：继承树与钩子方法
+
+Ants 练的是「用继承表达分类，用类属性表达差异」：
+`Insect → Ant → {HarvesterAnt, ThrowerAnt, ...}`，
+`ThrowerAnt → {ShortThrower, LongThrower, ScubaThrower}`。
+几个关键点：
+
+- `nearest_bee` 沿 `entrance` 链找最近的蜜蜂，射程用 `min_range` 控制；
+- `ContainerAnt` 通过 `can_contain / store_ant / remove_ant` 三个钩子实现「一格两只」；
+- `Water` 用 `is_waterproof` 决定是否秒杀；
+- `QueenAnt` 沿隧道翻倍伤害，`double()` 用 `doubled` 标记保证只翻一次。
+
+### Scheme：解释器的骨架
+
+Scheme 项目把「eval / apply」写成两个互相递归的函数：
+
+- `scheme_eval`：原子直接返回，`if/define/lambda/and/or/cond/let` 交给特殊形式表，
+  其余按「求值运算符 → 求值操作数 → 应用」处理；
+- `scheme_apply`：内建过程用 Python 函数，`LambdaProcedure` 建子环境，
+  `MuProcedure` 用动态作用域（用调用方环境而不是定义环境）；
+- 尾递归优化：`optimize_tail_calls` 在尾位置返回 `Unevaluated`，
+  `complete_apply` 负责把它继续求值，从而把递归压成循环。
+
+最容易错的几处：
+
+1. `and` / `or` 的返回值不是 `#t` / `#f`，而是最后一个被求值的表达式（短路）；
+2. `cond` 的 `else` 分支必须最后；
+3. `let` 的绑定先全部求值再建新帧（而不是逐条定义）；
+4. 内建函数的参数是从 Pair 链手动展开的，Python 的 `*args` 不认 Pair。
