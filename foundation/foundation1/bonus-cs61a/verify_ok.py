@@ -97,7 +97,6 @@ def verify(assignment_dir: Path) -> tuple[int, int, list[tuple]]:
             suite_type = suite.get("type")
             if suite_type not in (None, "doctest", "wwpp"):
                 continue
-            globs: dict = {}
             setup = suite.get("setup", "") or ""
             setup_lines = []
             for line in setup.splitlines():
@@ -105,15 +104,7 @@ def verify(assignment_dir: Path) -> tuple[int, int, list[tuple]]:
                 if stripped.startswith(">>> ") or stripped.startswith("... "):
                     setup_lines.append(re.sub(r"^\s*(?:>>> |\.\.\. )", "", line))
             setup_code = "\n".join(setup_lines)
-            if setup_code.strip():
-                try:
-                    exec(setup_code, globs)
-                except Exception as error:
-                    print(f"[setup 失败] {test_file.name}: {error}")
-                    continue
-            for src in src_files:
-                if src.endswith(".py") and (assignment_dir / src).exists():
-                    load_module(assignment_dir / src, globs)
+
             teardown = suite.get("teardown", "") or ""
             teardown_lines = []
             for line in teardown.splitlines():
@@ -122,7 +113,23 @@ def verify(assignment_dir: Path) -> tuple[int, int, list[tuple]]:
                     teardown_lines.append(re.sub(r"^\s*(?:>>> |\.\.\. )", "", line))
             teardown_code = "\n".join(teardown_lines)
 
-            for case in suite.get("cases", []):
+            def build_globs() -> dict:
+                """每个 case 用一份全新的 globals（与 ok 的行为一致）。"""
+                fresh: dict = {}
+                if setup_code.strip():
+                    try:
+                        exec(setup_code, fresh)
+                    except Exception:  # noqa: BLE001
+                        return {}
+                for src in src_files:
+                    if src.endswith(".py") and (assignment_dir / src).exists():
+                        load_module(assignment_dir / src, fresh)
+                return fresh
+
+            for case_index, case in enumerate(suite.get("cases", [])):
+                globs = build_globs()
+                if not globs:
+                    break
                 case_hashes = [h for _s, _o, hs in parse_prompts(case.get("code", "")) for h in hs]
                 hash_cursor = 0
 
@@ -169,7 +176,7 @@ def verify(assignment_dir: Path) -> tuple[int, int, list[tuple]]:
                             if any(lock(key, candidate) == expected_hash for candidate in candidates):
                                 passed += 1
                             else:
-                                failures.append((test["name"], source, line, expected_hash))
+                                failures.append((f'{test["name"]}#case{case_index}', source, line, expected_hash))
                         continue
 
                     # doctest：有打印输出只算打印，否则算返回值的 repr
@@ -184,9 +191,9 @@ def verify(assignment_dir: Path) -> tuple[int, int, list[tuple]]:
                     if any(lock(key, v) == expected_hash for v in variants):
                         passed += 1
                     else:
-                        failures.append((test["name"], source, answer, expected_hash))
+                        failures.append((f'{test["name"]}#case{case_index}', source, answer, expected_hash))
 
-            if teardown_code.strip():
+            if teardown_code.strip() and globs:
                 try:
                     exec(teardown_code, globs)
                 except Exception:  # noqa: BLE001

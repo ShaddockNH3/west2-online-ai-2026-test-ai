@@ -11,7 +11,7 @@ bonus-cs61a/
 ├── notes.md            # 全量学习笔记，覆盖每一份作业的主题
 ├── hw/                 # hw01-06 Python、hw07-09 Scheme、hw10 SQL
 ├── lab/                # lab00-08 Python、lab09/11 Scheme、lab10 解释器、lab12 SQL
-├── proj/               # hog.py（Project 1）、cats.py（Project 2）
+├── proj/               # hog.py（P1 骰子）、cats.py（P2 打字）、ants.py（P3 塔防）
 └── verify_ok.py        # 锁定测试自动验证器（见 verify_ok.md）
 ```
 
@@ -42,6 +42,7 @@ bonus-cs61a/
 | lab12 | SQL | 聚合与自连接 | ok 4/4 | ✅ |
 | hog | Python | 12 题完整项目（骰子游戏） | 官方锁定测试 66/66 + doctest | ✅ |
 | cats | Python | 10 题完整项目（打字测速） | 官方锁定测试 66/66 + doctest | ✅ |
+| ants | Python | 12 题完整项目（蚂蚁塔防，含 2 个附加题） | 官方锁定测试 80/80 | ✅ |
 
 ### 关于 hw06 的 `midsem_survey`
 

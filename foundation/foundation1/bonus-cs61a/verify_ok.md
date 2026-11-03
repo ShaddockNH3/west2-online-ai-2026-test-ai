@@ -41,6 +41,7 @@ python3 ../verify_ok.py .
 | lab06 | 5/5 |
 | lab07 | 20/20（需临时借用 lab08.py，课程包自带的跨作业导入） |
 | lab08 | 8/8 |
+| ants | 80/80 |
 
 hw01-06 与 lab10 的测试本身没有锁定用例（直接 doctest / SQL），
 用 `python3 ok --local --score` 即可验证。
