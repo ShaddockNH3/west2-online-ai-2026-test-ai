@@ -2,8 +2,14 @@
   "typeCheckingMode": "basic",
   "pythonVersion": "3.12",
   "pythonPlatform": "Darwin",
-  "include": ["foundation"],
-  "exclude": ["**/.venv", "**/__pycache__"],
+  "include": [
+    "foundation"
+  ],
+  "exclude": [
+    "**/.venv",
+    "**/__pycache__",
+    "foundation/foundation1/bonus-cs61a"
+  ],
   "reportMissingImports": "error",
   "reportMissingTypeStubs": "none"
 }
