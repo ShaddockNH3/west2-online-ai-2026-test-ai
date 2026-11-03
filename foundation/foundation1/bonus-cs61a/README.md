@@ -11,7 +11,8 @@ bonus-cs61a/
 ├── notes.md            # 全量学习笔记，覆盖每一份作业的主题
 ├── hw/                 # hw01-06 Python、hw07-09 Scheme、hw10 SQL
 ├── lab/                # lab00-08 Python、lab09/11 Scheme、lab10 解释器、lab12 SQL
-└── proj/hog.py         # Hog 项目 12 个问题
+├── proj/               # hog.py（Project 1）、cats.py（Project 2）
+└── verify_ok.py        # 锁定测试自动验证器（见 verify_ok.md）
 ```
 
 仓库里只提交解答文件；测试用例与 `ok` 评分器来自课程包（CS61A.zip），
@@ -39,7 +40,8 @@ bonus-cs61a/
 | lab10 | Python | 解释器（calc） | ok 3/3 | ✅ |
 | lab11 | Scheme | 宏、准引用 | ok 3/3 | ✅ |
 | lab12 | SQL | 聚合与自连接 | ok 4/4 | ✅ |
-| hog | Python | 12 题完整项目 | doctest 全过 + 整局模拟 | ✅ |
+| hog | Python | 12 题完整项目（骰子游戏） | 官方锁定测试 66/66 + doctest | ✅ |
+| cats | Python | 10 题完整项目（打字测速） | 官方锁定测试 66/66 + doctest | ✅ |
 
 ### 关于 hw06 的 `midsem_survey`
 
