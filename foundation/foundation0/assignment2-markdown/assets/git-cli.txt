@@ -1,0 +1,46 @@
+$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	foundation/
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+$ git add foundation/foundation0/README.md foundation/foundation0/assignment1-environment
+
+$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   foundation/foundation0/README.md
+	new file:   foundation/foundation0/assignment1-environment/assets/environment.png
+	new file:   foundation/foundation0/assignment1-environment/assets/environment.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	foundation/foundation0/assignment2-markdown/
+	foundation/foundation0/assignment3-hello-world/
+	foundation/foundation0/assignment4-oi/
+
+
+$ git commit -m "docs(foundation0): 完成作业 1 环境搭建记录"
+[main 3a4fc9e] docs(foundation0): 完成作业 1 环境搭建记录
+ 3 files changed, 106 insertions(+)
+ create mode 100644 foundation/foundation0/README.md
+ create mode 100644 foundation/foundation0/assignment1-environment/assets/environment.png
+ create mode 100644 foundation/foundation0/assignment1-environment/assets/environment.txt
+
+$ git log --oneline
+3a4fc9e docs(foundation0): 完成作业 1 环境搭建记录
+47b3204 chore: 初始化作业目录结构与 Markdown 检查配置
+5d6440b Initial commit
+
+$ git push
+To https://github.com/ShaddockNH3/west2-online-ai-2026-test-ai.git
+   5d6440b..3a4fc9e  main -> main
