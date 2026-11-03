@@ -8,7 +8,8 @@
   "exclude": [
     "**/.venv",
     "**/__pycache__",
-    "foundation/foundation1/bonus-cs61a"
+    "foundation/foundation1/bonus-cs61a",
+    "**/*.ipynb"
   ],
   "reportMissingImports": "error",
   "reportMissingTypeStubs": "none"

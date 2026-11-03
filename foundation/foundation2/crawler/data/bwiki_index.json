@@ -1,0 +1,338 @@
+[
+ {
+  "pageid": 91070,
+  "title": "埃吉尔",
+  "category": "Category:方案舰娘",
+  "chars": 11338,
+  "file": "bwiki_raw/PR_埃吉尔.txt"
+ },
+ {
+  "pageid": 91072,
+  "title": "安克雷奇",
+  "category": "Category:方案舰娘",
+  "chars": 11682,
+  "file": "bwiki_raw/PR_安克雷奇.txt"
+ },
+ {
+  "pageid": 51523,
+  "title": "奥丁",
+  "category": "Category:方案舰娘",
+  "chars": 9380,
+  "file": "bwiki_raw/PR_奥丁.txt"
+ },
+ {
+  "pageid": 91068,
+  "title": "奥古斯特·冯·帕塞瓦尔",
+  "category": "Category:方案舰娘",
+  "chars": 13141,
+  "file": "bwiki_raw/PR_奥古斯特·冯·帕塞瓦尔.txt"
+ },
+ {
+  "pageid": 91067,
+  "title": "白龙",
+  "category": "Category:方案舰娘",
+  "chars": 16271,
+  "file": "bwiki_raw/PR_白龙.txt"
+ },
+ {
+  "pageid": 225604,
+  "title": "暴风雨",
+  "category": "Category:方案舰娘",
+  "chars": 9839,
+  "file": "bwiki_raw/PR_暴风雨.txt"
+ },
+ {
+  "pageid": 450,
+  "title": "北风",
+  "category": "Category:方案舰娘",
+  "chars": 8300,
+  "file": "bwiki_raw/PR_北风.txt"
+ },
+ {
+  "pageid": 194380,
+  "title": "贝亚德",
+  "category": "Category:方案舰娘",
+  "chars": 9088,
+  "file": "bwiki_raw/PR_贝亚德.txt"
+ },
+ {
+  "pageid": 120290,
+  "title": "布雷斯特",
+  "category": "Category:方案舰娘",
+  "chars": 9570,
+  "file": "bwiki_raw/PR_布雷斯特.txt"
+ },
+ {
+  "pageid": 51524,
+  "title": "柴郡",
+  "category": "Category:方案舰娘",
+  "chars": 16670,
+  "file": "bwiki_raw/PR_柴郡.txt"
+ },
+ {
+  "pageid": 599,
+  "title": "出云",
+  "category": "Category:方案舰娘",
+  "chars": 8885,
+  "file": "bwiki_raw/PR_出云.txt"
+ },
+ {
+  "pageid": 194377,
+  "title": "大山",
+  "category": "Category:方案舰娘",
+  "chars": 11403,
+  "file": "bwiki_raw/PR_大山.txt"
+ },
+ {
+  "pageid": 51521,
+  "title": "德雷克",
+  "category": "Category:方案舰娘",
+  "chars": 13240,
+  "file": "bwiki_raw/PR_德雷克.txt"
+ },
+ {
+  "pageid": 225594,
+  "title": "邓肯",
+  "category": "Category:方案舰娘",
+  "chars": 9541,
+  "file": "bwiki_raw/PR_邓肯.txt"
+ },
+ {
+  "pageid": 212154,
+  "title": "迪米特里·顿斯科伊",
+  "category": "Category:方案舰娘",
+  "chars": 10152,
+  "file": "bwiki_raw/PR_迪米特里·顿斯科伊.txt"
+ },
+ {
+  "pageid": 146478,
+  "title": "菲利克斯·舒尔茨",
+  "category": "Category:方案舰娘",
+  "chars": 10651,
+  "file": "bwiki_raw/PR_菲利克斯·舒尔茨.txt"
+ },
+ {
+  "pageid": 601,
+  "title": "腓特烈大帝",
+  "category": "Category:方案舰娘",
+  "chars": 16418,
+  "file": "bwiki_raw/PR_腓特烈大帝.txt"
+ },
+ {
+  "pageid": 146445,
+  "title": "弗兰德尔",
+  "category": "Category:方案舰娘",
+  "chars": 10535,
+  "file": "bwiki_raw/PR_弗兰德尔.txt"
+ },
+ {
+  "pageid": 225587,
+  "title": "高梁",
+  "category": "Category:方案舰娘",
+  "chars": 7945,
+  "file": "bwiki_raw/PR_高梁.txt"
+ },
+ {
+  "pageid": 120585,
+  "title": "哈尔滨",
+  "category": "Category:方案舰娘",
+  "chars": 21421,
+  "file": "bwiki_raw/PR_哈尔滨.txt"
+ },
+ {
+  "pageid": 194379,
+  "title": "哈尔福德",
+  "category": "Category:方案舰娘",
+  "chars": 9649,
+  "file": "bwiki_raw/PR_哈尔福德.txt"
+ },
+ {
+  "pageid": 505,
+  "title": "海王星",
+  "category": "Category:方案舰娘",
+  "chars": 10398,
+  "file": "bwiki_raw/PR_海王星.txt"
+ },
+ {
+  "pageid": 149,
+  "title": "技能",
+  "category": "Category:方案舰娘",
+  "chars": 5313,
+  "file": "bwiki_raw/PR_技能.txt"
+ },
+ {
+  "pageid": 602,
+  "title": "加斯科涅",
+  "category": "Category:方案舰娘",
+  "chars": 12851,
+  "file": "bwiki_raw/PR_加斯科涅.txt"
+ },
+ {
+  "pageid": 212138,
+  "title": "金狮",
+  "category": "Category:方案舰娘",
+  "chars": 11306,
+  "file": "bwiki_raw/PR_金狮.txt"
+ },
+ {
+  "pageid": 598,
+  "title": "君主",
+  "category": "Category:方案舰娘",
+  "chars": 11386,
+  "file": "bwiki_raw/PR_君主.txt"
+ },
+ {
+  "pageid": 212177,
+  "title": "堪萨斯",
+  "category": "Category:方案舰娘",
+  "chars": 10286,
+  "file": "bwiki_raw/PR_堪萨斯.txt"
+ },
+ {
+  "pageid": 120583,
+  "title": "鲁普雷希特亲王",
+  "category": "Category:方案舰娘",
+  "chars": 10139,
+  "file": "bwiki_raw/PR_鲁普雷希特亲王.txt"
+ },
+ {
+  "pageid": 547,
+  "title": "路易九世",
+  "category": "Category:方案舰娘",
+  "chars": 14348,
+  "file": "bwiki_raw/PR_路易九世.txt"
+ },
+ {
+  "pageid": 546,
+  "title": "罗恩",
+  "category": "Category:方案舰娘",
+  "chars": 11396,
+  "file": "bwiki_raw/PR_罗恩.txt"
+ },
+ {
+  "pageid": 91071,
+  "title": "马可·波罗",
+  "category": "Category:方案舰娘",
+  "chars": 11628,
+  "file": "bwiki_raw/PR_马可·波罗.txt"
+ },
+ {
+  "pageid": 225586,
+  "title": "马克斯·殷麦曼",
+  "category": "Category:方案舰娘",
+  "chars": 7599,
+  "file": "bwiki_raw/PR_马克斯·殷麦曼.txt"
+ },
+ {
+  "pageid": 212178,
+  "title": "梅克伦堡",
+  "category": "Category:方案舰娘",
+  "chars": 10933,
+  "file": "bwiki_raw/PR_梅克伦堡.txt"
+ },
+ {
+  "pageid": 51522,
+  "title": "美因茨",
+  "category": "Category:方案舰娘",
+  "chars": 9251,
+  "file": "bwiki_raw/PR_美因茨.txt"
+ },
+ {
+  "pageid": 194381,
+  "title": "那不勒斯",
+  "category": "Category:方案舰娘",
+  "chars": 9742,
+  "file": "bwiki_raw/PR_那不勒斯.txt"
+ },
+ {
+  "pageid": 194184,
+  "title": "纳希莫夫海军上将",
+  "category": "Category:方案舰娘",
+  "chars": 9418,
+  "file": "bwiki_raw/PR_纳希莫夫海军上将.txt"
+ },
+ {
+  "pageid": 120268,
+  "title": "普利茅斯",
+  "category": "Category:方案舰娘",
+  "chars": 10502,
+  "file": "bwiki_raw/PR_普利茅斯.txt"
+ },
+ {
+  "pageid": 146498,
+  "title": "奇尔沙治",
+  "category": "Category:方案舰娘",
+  "chars": 15376,
+  "file": "bwiki_raw/PR_奇尔沙治.txt"
+ },
+ {
+  "pageid": 120274,
+  "title": "契卡洛夫",
+  "category": "Category:方案舰娘",
+  "chars": 9263,
+  "file": "bwiki_raw/PR_契卡洛夫.txt"
+ },
+ {
+  "pageid": 146418,
+  "title": "四万十",
+  "category": "Category:方案舰娘",
+  "chars": 12358,
+  "file": "bwiki_raw/PR_四万十.txt"
+ },
+ {
+  "pageid": 225368,
+  "title": "瓦尔帕莱索",
+  "category": "Category:方案舰娘",
+  "chars": 8295,
+  "file": "bwiki_raw/PR_瓦尔帕莱索.txt"
+ },
+ {
+  "pageid": 212190,
+  "title": "维托里奥·库尼贝尔蒂",
+  "category": "Category:方案舰娘",
+  "chars": 10945,
+  "file": "bwiki_raw/PR_维托里奥·库尼贝尔蒂.txt"
+ },
+ {
+  "pageid": 554,
+  "title": "吾妻",
+  "category": "Category:方案舰娘",
+  "chars": 9957,
+  "file": "bwiki_raw/PR_吾妻.txt"
+ },
+ {
+  "pageid": 506,
+  "title": "西雅图",
+  "category": "Category:方案舰娘",
+  "chars": 13404,
+  "file": "bwiki_raw/PR_西雅图.txt"
+ },
+ {
+  "pageid": 51525,
+  "title": "香槟",
+  "category": "Category:方案舰娘",
+  "chars": 8478,
+  "file": "bwiki_raw/PR_香槟.txt"
+ },
+ {
+  "pageid": 146491,
+  "title": "兴登堡",
+  "category": "Category:方案舰娘",
+  "chars": 9613,
+  "file": "bwiki_raw/PR_兴登堡.txt"
+ },
+ {
+  "pageid": 545,
+  "title": "伊吹",
+  "category": "Category:方案舰娘",
+  "chars": 14504,
+  "file": "bwiki_raw/PR_伊吹.txt"
+ },
+ {
+  "pageid": 600,
+  "title": "佐治亚",
+  "category": "Category:方案舰娘",
+  "chars": 11092,
+  "file": "bwiki_raw/PR_佐治亚.txt"
+ }
+]

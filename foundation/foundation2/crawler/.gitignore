@@ -1,0 +1,11 @@
+# 爬虫产出里不该进仓库的东西
+
+# 知乎登录态：等同于账号密码
+data/zhihu_state.json
+
+# 断点续爬用的原始记录：内容和 CSV 重复，2MB，删掉也能重新爬
+data/jwch_notices.jsonl
+
+# 附件与 PDF 体积大，且属于站点内容，按需下载即可
+data/attachments/
+data/ospp_pdf/

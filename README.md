@@ -18,13 +18,17 @@ foundation/
 │   ├── assignment3-hello-world/     # 作业 3：Hello World
 │   ├── assignment4-oi/              # 作业 4：洛谷与 AtCoder 五题
 │   └── bonus/                       # Bonus：13 个 Python 小程序
-└── foundation1/                     # 语法基础与简单面向对象
-    ├── docs/                        # 文档 1：Python 语法笔记 / 文档 2：终端使用
-    ├── assignment1-nabiya/          # 作业 1：娜比娅偷吃事件
-    ├── assignment2-campus-if-love/  # 作业 2：校园 if 恋（含存读档 Bonus）
-    ├── assignment3-pokemon/         # 作业 3：宝可梦对战
-    ├── assignment4-sanguosha/       # 作业 4：三国杀 demo
-    └── bonus-cs61a/                 # Bonus：CS61A 全部 hw/lab/hog + 笔记 + 配环境文档
+├── foundation1/                     # 语法基础与简单面向对象
+│   ├── docs/                        # 文档 1：Python 语法笔记 / 文档 2：终端使用
+│   ├── assignment1-nabiya/          # 作业 1：娜比娅偷吃事件
+│   ├── assignment2-campus-if-love/  # 作业 2：校园 if 恋（含存读档 Bonus）
+│   ├── assignment3-pokemon/         # 作业 3：宝可梦对战
+│   ├── assignment4-sanguosha/       # 作业 4：三国杀 demo
+│   └── bonus-cs61a/                 # Bonus：CS61A 全部 hw/lab/hog + 笔记 + 配环境文档
+└── foundation2/                     # 网络爬虫与数据分析
+    ├── crawler/                     # 4 个爬虫作业 + B-Wiki Bonus
+    ├── analysis/                    # Pandas / Matplotlib / NumPy 作业 + 图像 Bonus
+    └── notes.md                     # 14 条踩坑记录
 ```
 
 ## 完成情况
@@ -53,6 +57,23 @@ foundation/
 
 > Foundation 1 的作业 2 - 4 要求任选两个完成，本仓库三个都做了。
 
+### Foundation 2
+
+| 作业 | 内容 | 状态 |
+| --- | --- | --- |
+| 爬虫 1 | 福大教务通知 500+ 条 | 已完成（700 条，含附件下载量） |
+| 爬虫 2 | 知乎话题（浏览器操控） | 脚本完成，需扫码登录 |
+| 爬虫 3 | 开源之夏项目列表（接口） | 已完成（102 个项目） |
+| 爬虫 4 | Open-Meteo 单次请求 | 已完成（8784 + 366 行） |
+| 数据分析 1 | 教务处通知分析（Pandas） | 已完成（notebook + 6 图） |
+| 数据分析 2 | Logistic 函数（Matplotlib） | 已完成 |
+| 数据分析 3 | 矩阵与广播（NumPy） | 已完成 |
+| 爬虫 Bonus | B-Wiki 方案舰娘 | 已完成（48 页） |
+| 分析 Bonus | 图像数组操作 | 已完成 |
+| 爬虫 Bonus | 历年培养方案 | 未做 |
+
+> Foundation 2 的爬虫 Bonus 有两个，本轮做了 B-Wiki，「历年培养方案」留待单独一轮。
+
 ## 快速运行
 
 ```zsh
@@ -67,6 +88,15 @@ python foundation/foundation0/assignment4-oi/p1001_a_plus_b.py
 cd foundation/foundation1/assignment1-nabiya && python check_my_code.py
 cd foundation/foundation1/assignment2-campus-if-love && python main.py
 cd foundation/foundation1/assignment3-pokemon && python main.py
+
+# Foundation 2
+cd foundation/foundation2/crawler
+python assignment1_jwch.py        # 教务通知（约 8 分钟）
+python assignment3_ospp.py        # 开源之夏
+python assignment4_openmeteo.py   # 天气
+python bonus_bwiki.py             # B-Wiki
+cd ../analysis
+python assignment2_logistic.py && python assignment3_numpy.py && python bonus_image.py
 ```
 
 静态检查：
