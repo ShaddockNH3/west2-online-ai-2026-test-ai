@@ -18,13 +18,13 @@ from player import Player
 
 
 def assign_identities(rng: random.Random) -> list[str]:
-    """4 人身份局：主公、忠臣、反贼、内奸各一名。"""
-    identities = ["主公", "忠臣", "反贼", "内奸"]
+    """5 人标准局：主公、忠臣、内奸各一名，反贼两名。"""
+    identities = ["主公", "忠臣", "反贼", "反贼", "内奸"]
     rng.shuffle(identities)
     return identities
 
 
-def pick_generals(rng: random.Random, count: int = 4) -> list[General]:
+def pick_generals(rng: random.Random, count: int = 5) -> list[General]:
     """随机抽 count 名武将，保证四个阵营各出一人。"""
     by_kingdom: dict[str, list[General]] = {}
     for general in GENERALS.values():
@@ -62,12 +62,13 @@ def main() -> None:
     identities[0] = "主公"
 
     show_generals(generals)
-    print(f"\n你的身份：主公！其余玩家的身份暂时保密（AI 直接知晓彼此身份，属简化）。\n")
+    print("\n你的身份：主公！其余玩家的身份暂时保密（AI 直接知晓彼此身份，属简化）。")
+    print("场上配置：主公（你）、忠臣、内奸各一名，反贼两名。\n")
 
     players = [
         Player(seat=index, name="你" if index == 0 else f"AI {index}",
                identity=identities[index], general=generals[index])
-        for index in range(4)
+        for index in range(len(identities))
     ]
 
     game = Game(players, Deck(seed=args.seed))
