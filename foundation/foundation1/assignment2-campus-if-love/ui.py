@@ -23,6 +23,21 @@ def ask_choice(prompt: str, count: int) -> int | None:
         print(f"请输入 1 到 {count} 之间的数字。")
 
 
+def ask_yes_no(prompt: str) -> bool:
+    """读取 y/n 的是否问题；读不到输入（EOF）时按「否」处理。"""
+    while True:
+        try:
+            raw = input(f"{prompt}（y/n）：").strip().lower()
+        except EOFError:
+            print()
+            return False
+        if raw in ("y", "yes", "是"):
+            return True
+        if raw in ("n", "no", "否"):
+            return False
+        print("请输入 y 或 n。")
+
+
 def show_lines(lines: list[str]) -> None:
     """按顺序打印一段旁白。"""
     for line in lines:
