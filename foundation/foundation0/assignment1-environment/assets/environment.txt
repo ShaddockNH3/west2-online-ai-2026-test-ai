@@ -1,0 +1,25 @@
+$ uv venv --python 3.12.3
+Using CPython 3.12.3
+Creating virtual environment at: .venv
+Activate with: source .venv/bin/activate
+
+$ source .venv/bin/activate
+$ python --version
+Python 3.12.3
+
+$ which python
+/Users/shaddocknh3/Desktop/github/west2-online-ai-2026-test-ai/.venv/bin/python
+
+$ uv --version
+uv 0.12.19 (Homebrew 2026-09-24 aarch64-apple-darwin)
+
+$ git --version
+git version 2.50.1 (Apple Git-155)
+
+$ sw_vers
+ProductName:            macOS
+ProductVersion:         26.7.1
+BuildVersion:           25G241
+
+$ python foundation/foundation0/assignment3-hello-world/hello_world.py
+Hello, World!
