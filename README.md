@@ -50,6 +50,30 @@ foundation/
 
 > Foundation 1 的作业 2 - 4 要求任选两个完成，本仓库选择作业 2 与作业 3。
 
+## 快速运行
+
+```zsh
+# 环境
+uv venv --python 3.12.3 && source .venv/bin/activate
+
+# Foundation 0
+python foundation/foundation0/assignment3-hello-world/hello_world.py
+python foundation/foundation0/assignment4-oi/p1001_a_plus_b.py
+
+# Foundation 1
+cd foundation/foundation1/assignment1-nabiya && python check_my_code.py
+cd foundation/foundation1/assignment2-campus-if-love && python main.py
+cd foundation/foundation1/assignment3-pokemon && python main.py
+```
+
+静态检查：
+
+```zsh
+basedpyright                                    # 类型检查，等价于 Pylance
+npx markdownlint-cli2 "**/*.md"                 # Markdown 规范
+npx autocorrect-node --lint "**/*.md"           # 中英文空格（苹果规范）
+```
+
 ## 运行环境
 
 - macOS 26.7.1（Apple Silicon）
