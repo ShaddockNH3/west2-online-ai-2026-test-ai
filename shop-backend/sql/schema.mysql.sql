@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS jobs (
 	PRIMARY KEY (id), 
 	UNIQUE (dedupe_key)
 );
-CREATE INDEX ix_jobs_status_next ON jobs (status, next_run_at);
 CREATE INDEX ix_jobs_job_type ON jobs (job_type);
+CREATE INDEX ix_jobs_status_next ON jobs (status, next_run_at);
 
 CREATE TABLE IF NOT EXISTS users (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
@@ -129,8 +129,8 @@ CREATE TABLE IF NOT EXISTS orders (
 	UNIQUE (order_no), 
 	FOREIGN KEY(user_id) REFERENCES users (id)
 );
-CREATE INDEX ix_orders_user_id ON orders (user_id);
 CREATE INDEX ix_orders_status_created ON orders (status, created_at);
+CREATE INDEX ix_orders_user_id ON orders (user_id);
 CREATE INDEX ix_orders_user_status ON orders (user_id, status);
 
 CREATE TABLE IF NOT EXISTS products (
@@ -145,8 +145,8 @@ CREATE TABLE IF NOT EXISTS products (
 	PRIMARY KEY (id), 
 	FOREIGN KEY(category_id) REFERENCES categories (id)
 );
-CREATE INDEX ix_products_category_id ON products (category_id);
 CREATE INDEX ix_products_status_id ON products (status, id);
+CREATE INDEX ix_products_category_id ON products (category_id);
 
 CREATE TABLE IF NOT EXISTS fulfillments (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
@@ -209,9 +209,9 @@ CREATE TABLE IF NOT EXISTS payments (
 	FOREIGN KEY(order_id) REFERENCES orders (id), 
 	FOREIGN KEY(user_id) REFERENCES users (id)
 );
-CREATE INDEX ix_payments_user_id ON payments (user_id);
 CREATE INDEX ix_payments_order_id ON payments (order_id);
 CREATE INDEX ix_payments_order_no ON payments (order_no);
+CREATE INDEX ix_payments_user_id ON payments (user_id);
 
 CREATE TABLE IF NOT EXISTS skus (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
@@ -241,8 +241,8 @@ CREATE TABLE IF NOT EXISTS activity_skus (
 	FOREIGN KEY(activity_id) REFERENCES activities (id), 
 	FOREIGN KEY(sku_id) REFERENCES skus (id)
 );
-CREATE INDEX ix_activity_skus_sku_id ON activity_skus (sku_id);
 CREATE INDEX ix_activity_skus_activity_id ON activity_skus (activity_id);
+CREATE INDEX ix_activity_skus_sku_id ON activity_skus (sku_id);
 
 CREATE TABLE IF NOT EXISTS cart_items (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
@@ -279,8 +279,8 @@ CREATE TABLE IF NOT EXISTS flash_sale_requests (
 	FOREIGN KEY(sku_id) REFERENCES skus (id), 
 	FOREIGN KEY(user_id) REFERENCES users (id)
 );
-CREATE INDEX ix_flash_activity_sku_user ON flash_sale_requests (activity_id, sku_id, user_id);
 CREATE INDEX ix_flash_sale_requests_user_id ON flash_sale_requests (user_id);
+CREATE INDEX ix_flash_activity_sku_user ON flash_sale_requests (activity_id, sku_id, user_id);
 
 CREATE TABLE IF NOT EXISTS inventory (
 	id INTEGER NOT NULL AUTO_INCREMENT, 

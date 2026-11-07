@@ -5,48 +5,67 @@ from __future__ import annotations
 from blacksheep import Request
 from blacksheep.server.routing import Router
 
-from app.core.db import db
+from app.api import presenters
+from app.application.services.activities import ActivityService
+from app.application.services.auth import PrincipalService
 from app.core.params import read_body
 from app.core.responses import ok
 from app.deps import require_admin
 from app.schemas import ActivityIn, ActivityPatch
-from app.services import activities as activity_service
 
 
 def register(router: Router) -> None:
     @router.get("/activities")
-    async def list_activities(request: Request):
-        async with db.session() as session:
-            rows = await activity_service.list_activities(session, active_only=True)
-            items = [await activity_service.detail(session, row) for row in rows]
-            return ok({"items": items})
+    async def list_activities(activities: ActivityService):
+        rows = await activities.list(active_only=True)
+        items = [presenters.activity_detail(await activities.detail(row)) for row in rows]
+        return ok({"items": items})
 
     @router.get("/activities/{activity_id}")
-    async def get_activity(request: Request, activity_id: int):
-        async with db.session() as session:
-            activity = await activity_service.get_activity(session, activity_id)
-            return ok(await activity_service.detail(session, activity))
+    async def get_activity(activity_id: int, activities: ActivityService):
+        return ok(presenters.activity_detail(await activities.detail_of(activity_id)))
 
     @router.get("/admin/activities")
-    async def admin_list_activities(request: Request):
-        await require_admin(request)
-        async with db.session() as session:
-            rows = await activity_service.list_activities(session, include_disabled=True)
-            items = [await activity_service.detail(session, row) for row in rows]
-            return ok({"items": items})
+    async def admin_list_activities(
+        request: Request, activities: ActivityService, principals: PrincipalService
+    ):
+        await require_admin(request, principals)
+        rows = await activities.list(include_disabled=True)
+        items = [presenters.activity_detail(await activities.detail(row)) for row in rows]
+        return ok({"items": items})
 
     @router.post("/admin/activities")
-    async def create_activity(request: Request):
-        await require_admin(request)
+    async def create_activity(
+        request: Request, activities: ActivityService, principals: PrincipalService
+    ):
+        await require_admin(request, principals)
         data = await read_body(request, ActivityIn)
-        async with db.session() as session:
-            activity = await activity_service.create_activity(session, data)
-            return ok(await activity_service.detail(session, activity), status=201)
+        activity = await activities.create(
+            name=data.name,
+            type=data.type,
+            status=data.status,
+            description=data.description,
+            starts_at=data.startsAt,
+            ends_at=data.endsAt,
+            skus=[item.model_dump() for item in data.skus],
+        )
+        return ok(presenters.activity_detail(await activities.detail(activity)), status=201)
 
     @router.patch("/admin/activities/{activity_id}")
-    async def update_activity(request: Request, activity_id: int):
-        await require_admin(request)
+    async def update_activity(
+        request: Request,
+        activity_id: int,
+        activities: ActivityService,
+        principals: PrincipalService,
+    ):
+        await require_admin(request, principals)
         data = await read_body(request, ActivityPatch)
-        async with db.session() as session:
-            activity = await activity_service.update_activity(session, activity_id, data)
-            return ok(await activity_service.detail(session, activity))
+        activity = await activities.update(
+            activity_id,
+            name=data.name,
+            description=data.description,
+            starts_at=data.startsAt,
+            ends_at=data.endsAt,
+            status=data.status,
+        )
+        return ok(presenters.activity_detail(await activities.detail(activity)))

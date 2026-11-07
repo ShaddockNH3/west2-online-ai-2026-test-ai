@@ -10,7 +10,7 @@ import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
 
-from app.core.errors import TokenExpiredError, ValidationError
+from app.domain.errors import TokenExpiredError, ValidationError
 
 _hasher = PasswordHasher(time_cost=2, memory_cost=65536, parallelism=2)
 

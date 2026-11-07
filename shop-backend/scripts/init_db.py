@@ -12,21 +12,28 @@ from datetime import timedelta
 
 from sqlalchemy import select
 
-from app.constants import DEFAULT_WAREHOUSE_ID, ActivityStatus, ActivityType, Role
 from app.core.config import get_settings
 from app.core.db import db
 from app.core.security import hash_password
-from app.models import (
+from app.domain.constants import (
+    DEFAULT_WAREHOUSE_ID,
+    ActivityStatus,
+    ActivityType,
+    InventoryChange,
+    Role,
+)
+from app.infrastructure.persistence.models import (
     Activity,
     ActivitySku,
     Address,
     Category,
+    Inventory,
+    InventoryLog,
     Product,
     Sku,
     User,
     Warehouse,
 )
-from app.services import inventory as inventory_service
 from app.utils import utcnow
 
 
@@ -85,7 +92,21 @@ async def ensure_sku(
     )
     session.add(sku)
     await session.flush()
-    await inventory_service.ensure_inventory(session, sku.id, stock)
+    session.add(Inventory(warehouse_id=DEFAULT_WAREHOUSE_ID, sku_id=sku.id, available=stock))
+    await session.flush()
+    session.add(
+        InventoryLog(
+            inventory_id=(
+                await session.scalar(select(Inventory.id).where(Inventory.sku_id == sku.id))
+            ),
+            sku_id=sku.id,
+            change_type=InventoryChange.INBOUND,
+            quantity=stock,
+            available_before=0,
+            available_after=stock,
+            reason="初始化库存",
+        )
+    )
     return sku
 
 

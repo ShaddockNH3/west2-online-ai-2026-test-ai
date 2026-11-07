@@ -1,70 +1,58 @@
-"""后台任务执行器：轮询 jobs 表，异步处理订单关单、履约生成、秒杀建单。"""
+"""后台任务执行器：轮询 jobs 表，把任务分派给应用服务。
+
+数据库是唯一状态源，所以进程重启不会丢任务；认领靠带条件的原子更新，
+多个 worker 同时跑也只有一个能拿到同一条。
+"""
 
 from __future__ import annotations
 
 import asyncio
 import logging
+from typing import TYPE_CHECKING
 
-from app.constants import JobStatus, JobType
-from app.core.db import db
-from app.models import Job
-from app.services import flashsale, fulfillment, jobs
-from app.services import orders as order_service
+from app.domain.constants import JobType
+from app.domain.entities import Job
+
+if TYPE_CHECKING:
+    from app.container import Container
 
 logger = logging.getLogger(__name__)
 
 
-async def dispatch(session, job: Job) -> None:
-    payload = job.payload or {}
-    if job.job_type == JobType.CLOSE_EXPIRED_ORDER:
-        closed = await order_service.close_if_expired(session, str(payload.get("orderNo", "")))
-        logger.info("close expired order %s -> %s", payload.get("orderNo"), closed)
-    elif job.job_type == JobType.BUILD_FULFILLMENT:
-        record = await fulfillment.create_for_order(session, str(payload.get("orderNo", "")))
-        logger.info(
-            "build fulfillment for %s -> %s",
-            payload.get("orderNo"),
-            record and record.fulfillment_no,
-        )
-    elif job.job_type == JobType.SEND_ORDER_NOTIFICATION:
-        # 本地模拟通知渠道，不接真实短信/邮件
-        logger.info("notify user %s about order %s", payload.get("userId"), payload.get("orderNo"))
-    elif job.job_type == JobType.CREATE_FLASH_ORDER:
-        await flashsale.process(session, int(payload.get("requestId", 0)))
-    else:
-        raise ValueError(f"未知任务类型：{job.job_type}")
+class JobDispatcher:
+    """任务类型 → 应用服务方法。新增任务类型只改这里。"""
 
+    def __init__(self, container: Container) -> None:
+        self._c = container
 
-async def execute(job_id: int) -> bool:
-    """执行一条已认领的任务。任何异常都会写回 last_error 并决定是否重试。"""
-    async with db.session() as session:
-        job = await session.get(Job, job_id)
-        if job is None:
-            return False
-        job_type = job.job_type
+    async def dispatch(self, job: Job) -> None:
         payload = dict(job.payload or {})
-        try:
-            await dispatch(session, job)
-            await jobs.finish(session, job)
-            return True
-        except Exception as exc:  # noqa: BLE001 - 任务失败必须落库，不能吞掉
-            logger.exception("job %s (%s) failed", job.id, job_type)
-            await session.rollback()
-            fresh = await session.get(Job, job_id, populate_existing=True)
-            if fresh is None:
-                return False
-            retrying = await jobs.retry_or_fail(session, fresh, f"{type(exc).__name__}: {exc}")
-            if not retrying and job_type == JobType.CREATE_FLASH_ORDER:
-                await flashsale.mark_failed(
-                    session, int(payload.get("requestId", 0)), f"建单失败：{exc}"
-                )
-            return False
+        if job.job_type == JobType.CLOSE_EXPIRED_ORDER:
+            closed = await self._c.orders.close_if_expired(str(payload.get("orderNo", "")))
+            logger.info("close expired order %s -> %s", payload.get("orderNo"), closed)
+        elif job.job_type == JobType.BUILD_FULFILLMENT:
+            record = await self._c.fulfillments.create_for_order(str(payload.get("orderNo", "")))
+            logger.info(
+                "build fulfillment for %s -> %s",
+                payload.get("orderNo"),
+                record and record.fulfillment_no,
+            )
+        elif job.job_type == JobType.SEND_ORDER_NOTIFICATION:
+            # 本地模拟通知渠道，不接真实短信/邮件
+            logger.info(
+                "notify user %s about order %s", payload.get("userId"), payload.get("orderNo")
+            )
+        elif job.job_type == JobType.CREATE_FLASH_ORDER:
+            await self._c.flash_sales.process(int(payload.get("requestId", 0)))
+        else:
+            raise ValueError(f"未知任务类型：{job.job_type}")
 
 
 class WorkerPool:
-    """协程池。数据库是唯一状态源，所以重启不会丢任务。"""
-
-    def __init__(self, concurrency: int = 2, poll_interval: float = 0.5) -> None:
+    def __init__(self, container: Container, concurrency: int = 2, poll_interval: float = 0.5):
+        self._container = container
+        self._uow = container.uow_factory
+        self._dispatcher = JobDispatcher(container)
         self.concurrency = max(1, concurrency)
         self.poll_interval = poll_interval
         self._tasks: list[asyncio.Task] = []
@@ -104,35 +92,37 @@ class WorkerPool:
     async def run_once(self, limit: int = 1) -> int:
         processed = 0
         for _ in range(limit):
-            async with db.session() as session:
-                job = await jobs.claim_one(session)
-            if job is None:
-                break
-            await execute(job.id)
+            async with self._uow() as uow:
+                job = await uow.jobs.claim_one()
+                if job is None:
+                    break
+                await uow.commit()
+            await self._execute(job)
             processed += 1
             self.processed += 1
         return processed
 
+    async def _execute(self, job: Job) -> bool:
+        try:
+            await self._dispatcher.dispatch(job)
+        except Exception as exc:  # noqa: BLE001 - 任务失败必须落库，不能吞掉
+            logger.exception("job %s (%s) failed", job.id, job.job_type)
+            async with self._uow() as uow:
+                retrying = await uow.jobs.retry_or_fail(job, f"{type(exc).__name__}: {exc}")
+                await uow.commit()
+            if not retrying and job.job_type == JobType.CREATE_FLASH_ORDER:
+                await self._container.flash_sales.mark_failed(
+                    int(job.payload.get("requestId", 0)), f"建单失败：{exc}"
+                )
+            return False
 
-async def recover() -> int:
-    async with db.session() as session:
-        return await jobs.recover_stale(session)
+        async with self._uow() as uow:
+            await uow.jobs.finish(job.id)
+            await uow.commit()
+        return True
 
-
-async def run_until_idle(max_rounds: int = 50) -> int:
-    """测试与本地手动排查用：把当前待执行任务跑完。"""
-    total = 0
-    for _ in range(max_rounds):
-        worked = await WorkerPool(concurrency=1).run_once()
-        if not worked:
-            break
-        total += 1
-    return total
-
-
-async def stats() -> dict:
-    async with db.session() as session:
-        rows = await jobs.list_jobs(session, page=1, page_size=1)
-        pending = await jobs.list_jobs(session, page=1, page_size=1, status=JobStatus.PENDING)
-        failed = await jobs.list_jobs(session, page=1, page_size=1, status=JobStatus.FAILED)
-    return {"pending": pending[1], "failed": failed[1], "total": rows[1]}
+    async def recover(self) -> int:
+        async with self._uow() as uow:
+            recovered = await uow.jobs.recover_stale(stuck_seconds=300)
+            await uow.commit()
+            return recovered

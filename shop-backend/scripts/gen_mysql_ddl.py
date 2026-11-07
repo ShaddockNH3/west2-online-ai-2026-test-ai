@@ -10,7 +10,7 @@ from pathlib import Path
 from sqlalchemy.dialects import mysql
 from sqlalchemy.schema import CreateIndex, CreateTable
 
-from app.models import Base
+from app.infrastructure.persistence.models import Base
 
 OUTPUT = Path(__file__).resolve().parent.parent / "sql" / "schema.mysql.sql"
 

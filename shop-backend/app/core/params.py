@@ -8,7 +8,7 @@ from blacksheep import Request
 from pydantic import BaseModel
 from pydantic import ValidationError as PydanticValidationError
 
-from app.core.errors import ValidationError
+from app.domain.errors import ValidationError
 
 
 def _validate[TModel: BaseModel](model: type[TModel], payload: object) -> TModel:

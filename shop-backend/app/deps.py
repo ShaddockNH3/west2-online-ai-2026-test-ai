@@ -1,19 +1,16 @@
-"""鉴权依赖：解析 Bearer Token，同时校验会话状态和角色。"""
+"""鉴权：解析 Bearer Token，校验会话，再交给应用层的 PrincipalService。"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 from blacksheep import Request
-from sqlalchemy import select
 
-from app.constants import Role, UserStatus
+from app.application.services.auth import PrincipalService
 from app.core.config import get_settings
-from app.core.db import db
-from app.core.errors import AuthError, PermissionDenied
 from app.core.security import ACCESS, decode_token
-from app.models import AuthSession, User
-from app.utils import utcnow
+from app.domain.constants import Role
+from app.domain.errors import AuthError, PermissionDenied
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,43 +36,22 @@ def bearer_token(request: Request) -> str:
     return token.strip()
 
 
-async def require_principal(request: Request) -> Principal:
-    settings = get_settings()
-    claims = decode_token(bearer_token(request), expected_type=ACCESS, secret=settings.jwt_secret)
+async def require_principal(request: Request, principals: PrincipalService) -> Principal:
+    claims = decode_token(
+        bearer_token(request), expected_type=ACCESS, secret=get_settings().jwt_secret
+    )
     session_id = str(claims.get("sid") or "")
     try:
         user_id = int(claims["sub"])
     except (KeyError, TypeError, ValueError) as exc:
         raise AuthError("登录凭证无效") from exc
 
-    async with db.session() as session:
-        # 会话与用户一次 join 查完，少一次往返；写路径上的每次查询都会拉长持锁时间
-        row = (
-            await session.execute(
-                select(AuthSession, User)
-                .join(User, User.id == AuthSession.user_id)
-                .where(AuthSession.id == session_id)
-            )
-        ).first()
-        if row is None:
-            raise AuthError("登录已失效，请重新登录")
-        auth_session, user = row
-        if auth_session.revoked_at is not None:
-            raise AuthError("登录已失效，请重新登录")
-        if auth_session.expires_at <= utcnow():
-            raise AuthError("登录已过期，请重新登录")
-        if auth_session.user_id != user_id:
-            raise AuthError("登录凭证无效")
-        if user.status != UserStatus.ACTIVE:
-            raise AuthError("账号不可用，请联系管理员")
-        role = user.role
-        username = user.username
-
-    return Principal(user_id=user_id, username=username, role=role, session_id=session_id)
+    user = await principals.load(session_id=session_id, user_id=user_id)
+    return Principal(user_id=user.id, username=user.username, role=user.role, session_id=session_id)
 
 
-async def require_admin(request: Request) -> Principal:
-    principal = await require_principal(request)
+async def require_admin(request: Request, principals: PrincipalService) -> Principal:
+    principal = await require_principal(request, principals)
     if not principal.is_admin:
         raise PermissionDenied("需要管理员权限")
     return principal
