@@ -1,0 +1,67 @@
+{
+  "startedAt": "2026-11-07T12:04:34.777468+00:00",
+  "environment": {
+    "python": "3.12.3",
+    "framework": "BlackSheep 2.6.4 + uvicorn",
+    "database": "SQLite (WAL)",
+    "users": 40,
+    "concurrency": 20
+  },
+  "activityId": 2,
+  "skuId": 4,
+  "browse": {
+    "requests": 578,
+    "durationSeconds": 6.09,
+    "throughput": 94.88,
+    "avgMs": 209.28,
+    "p50Ms": 186.38,
+    "p95Ms": 365.2,
+    "p99Ms": 466.4,
+    "maxMs": 513.83,
+    "statuses": {
+      "200": 578
+    },
+    "technicalErrors": 0,
+    "sampleErrors": []
+  },
+  "flashSale": {
+    "accepted": 40,
+    "rejected": 0,
+    "final": {
+      "succeeded": 40,
+      "queued": 0
+    },
+    "pendingOrders": 40,
+    "inventory": {
+      "skuId": 4,
+      "skuCode": "BADGE-01",
+      "warehouseId": 1,
+      "available": 60,
+      "reserved": 40,
+      "sold": 0,
+      "updatedAt": "2026-11-07T12:04:42Z",
+      "productId": 3,
+      "productName": "亚克力徽章",
+      "specs": {
+        "规格": "默认"
+      },
+      "skuStatus": "ON_SALE",
+      "productStatus": "ON_SALE"
+    },
+    "samples": {
+      "requests": 40,
+      "durationSeconds": 1.46,
+      "throughput": 27.34,
+      "avgMs": 709.14,
+      "p50Ms": 622.89,
+      "p95Ms": 1270.26,
+      "p99Ms": 1453.41,
+      "maxMs": 1453.41,
+      "statuses": {
+        "202": 40
+      },
+      "technicalErrors": 0,
+      "sampleErrors": []
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "startedAt": "2026-11-07T13:01:33.804108+00:00",
+  "environment": {
+    "python": "3.12.3",
+    "framework": "BlackSheep 2.6.4 + uvicorn",
+    "database": "SQLite (WAL)",
+    "users": 0,
+    "concurrency": 20
+  },
+  "activityId": 2,
+  "skuId": 4,
+  "browse": {
+    "requests": 2180,
+    "durationSeconds": 8.04,
+    "throughput": 271.17,
+    "avgMs": 73.57,
+    "p50Ms": 41.93,
+    "p95Ms": 229.29,
+    "p99Ms": 525.93,
+    "maxMs": 1351.52,
+    "statuses": {
+      "200": 2180
+    },
+    "technicalErrors": 0,
+    "sampleErrors": []
+  }
+}
