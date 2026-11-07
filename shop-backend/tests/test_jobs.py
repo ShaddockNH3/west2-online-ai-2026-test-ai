@@ -6,13 +6,12 @@ from datetime import timedelta
 
 from sqlalchemy import select, update
 
-from app.constants import JobStatus
 from app.core.db import db
-from app.models import Job, Order
-from app.services import jobs as job_service
+from app.domain.constants import JobStatus
+from app.infrastructure.persistence.models import Job, Order
+from app.infrastructure.persistence.repositories.fulfillments import SqlJobRepository
 from app.utils import utcnow
-from app.worker import WorkerPool, recover
-from tests.helpers import Api
+from tests.helpers import Api, recover_jobs, run_worker
 
 
 async def test_expired_order_is_closed_and_stock_released(user: Api, admin: Api):
@@ -33,7 +32,7 @@ async def test_expired_order_is_closed_and_stock_released(user: Api, admin: Api)
         )
         await session.commit()
 
-    await WorkerPool(1).run_once(limit=20)
+    await run_worker(limit=20)
     detail = await user.order_detail(order_no)
     assert detail["status"] == "CANCELLED"
     assert detail["cancelReason"] == "EXPIRED"
@@ -43,7 +42,9 @@ async def test_expired_order_is_closed_and_stock_released(user: Api, admin: Api)
 
 async def test_failed_job_retries_then_marks_failed(admin: Api):
     async with db.session() as session:
-        job = await job_service.enqueue(session, "UNKNOWN_JOB", {"foo": "bar"})
+        job = await SqlJobRepository(session).enqueue(
+            "UNKNOWN_JOB", {"foo": "bar"}, dedupe_key=None, delay_seconds=0, max_attempts=None
+        )
         assert job is not None
         await session.commit()
         job_id = job.id
@@ -53,7 +54,7 @@ async def test_failed_job_retries_then_marks_failed(admin: Api):
         async with db.session() as session:
             await session.execute(update(Job).values(next_run_at=utcnow() - timedelta(seconds=1)))
             await session.commit()
-        await WorkerPool(1).run_once(limit=5)
+        await run_worker(limit=5)
 
     async with db.session() as session:
         stored = await session.get(Job, job_id)
@@ -72,7 +73,13 @@ async def test_failed_job_retries_then_marks_failed(admin: Api):
 
 async def test_recover_stale_running_jobs(admin: Api):
     async with db.session() as session:
-        job = await job_service.enqueue(session, "SEND_ORDER_NOTIFICATION", {"orderNo": "x"})
+        job = await SqlJobRepository(session).enqueue(
+            "SEND_ORDER_NOTIFICATION",
+            {"orderNo": "x"},
+            dedupe_key=None,
+            delay_seconds=0,
+            max_attempts=None,
+        )
         await session.commit()
         await session.execute(
             update(Job)
@@ -80,7 +87,7 @@ async def test_recover_stale_running_jobs(admin: Api):
             .values(status=JobStatus.RUNNING, locked_at=utcnow() - timedelta(minutes=10))
         )
         await session.commit()
-    recovered = await recover()
+    recovered = await recover_jobs()
     assert recovered == 1
     async with db.session() as session:
         stored = await session.get(Job, job.id)

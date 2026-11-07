@@ -135,3 +135,20 @@ class Api:
 
     async def pay(self, order_no: str, result: str = "SUCCESS") -> dict[str, Any]:
         return await self.post(f"/orders/{order_no}/payments", {"result": result}, expected=201)
+
+
+def worker(concurrency: int = 1):
+    """按当前配置建一个 WorkerPool，供测试手动驱动后台任务。"""
+    from app.container import build_container
+    from app.core.config import get_settings
+    from app.worker import WorkerPool
+
+    return WorkerPool(build_container(get_settings()), concurrency=concurrency)
+
+
+async def run_worker(limit: int = 20, concurrency: int = 1) -> int:
+    return await worker(concurrency).run_once(limit=limit)
+
+
+async def recover_jobs() -> int:
+    return await worker().recover()

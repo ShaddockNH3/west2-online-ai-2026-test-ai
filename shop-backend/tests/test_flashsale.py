@@ -6,8 +6,7 @@ import asyncio
 from datetime import timedelta
 
 from app.utils import utcnow
-from app.worker import WorkerPool
-from tests.helpers import Api
+from tests.helpers import Api, run_worker
 
 
 async def make_user(shop: Api, index: int) -> Api:
@@ -75,7 +74,7 @@ async def test_flash_sale_accepts_then_creates_order(shop: Api, admin: Api):
     queued = await user.get("/flash-sale/requests/flash-accept-01")
     assert queued["status"] == "QUEUED"
 
-    await WorkerPool(1).run_once(limit=20)
+    await run_worker(limit=20)
     done = await user.get("/flash-sale/requests/flash-accept-01")
     assert done["status"] == "SUCCEEDED"
     assert done["orderNo"]
@@ -142,7 +141,7 @@ async def test_flash_sale_idempotent_request(shop: Api, admin: Api):
     first = await user.post(f"/activities/{activity_id}/flash-sale", payload, expected=202)
     second = await user.post(f"/activities/{activity_id}/flash-sale", payload, expected=200)
     assert first["requestId"] == second["requestId"]
-    await WorkerPool(1).run_once(limit=20)
+    await run_worker(limit=20)
     orders = (await user.get("/orders"))["items"]
     assert len(orders) == 1
 
@@ -196,7 +195,7 @@ async def test_flash_sale_concurrency_never_oversells(shop: Api, admin: Api):
     assert not errors, errors
     assert sum(1 for item in results if item is True) == 3
 
-    await WorkerPool(1).run_once(limit=30)
+    await run_worker(limit=30)
     created = [await user.get("/flash-sale/requests") for user in users]
     succeeded = [
         item for rows in created for item in rows["items"] if item["status"] == "SUCCEEDED"
