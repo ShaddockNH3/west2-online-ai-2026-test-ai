@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# shop-backend 的前端构建产物要提交，供后端直接托管
+!shop-backend/web/dist/
+!shop-backend/web/dist/**
+
+# macOS
+.DS_Store
