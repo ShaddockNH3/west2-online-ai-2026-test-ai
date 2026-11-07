@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# 运行时数据：数据库与日志不进仓库
+var/
+logs/*.log
+.env
+
+# 前端依赖
+web/node_modules/
+web/.vite/
+
+.DS_Store
+*.swp

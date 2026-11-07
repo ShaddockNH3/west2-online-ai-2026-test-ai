@@ -1,0 +1,64 @@
+name: west2-shop
+
+services:
+  db:
+    image: mysql:8.4
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pwd_change_me
+      MYSQL_DATABASE: shop
+      MYSQL_USER: shop
+      MYSQL_PASSWORD: shop_pwd_change_me
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql/schema.mysql.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ushop", "-pshop_pwd_change_me"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SHOP_ENV: prod
+      SHOP_DATABASE_URL: mysql+asyncmy://shop:shop_pwd_change_me@db:3306/shop?charset=utf8mb4
+      SHOP_JWT_SECRET: please-change-this-to-a-random-48-char-secret-value
+      SHOP_ACCESS_TTL: "1800"
+      SHOP_REFRESH_TTL: "604800"
+      SHOP_ORDER_EXPIRE_MINUTES: "30"
+      SHOP_REDIS_URL: redis://redis:6379/0
+      SHOP_CACHE_TTL: "20"
+      SHOP_WORKER_ENABLED: "true"
+      SHOP_WORKER_CONCURRENCY: "2"
+      SHOP_ADMIN_USERNAME: admin
+      SHOP_ADMIN_PASSWORD: admin123456
+      SHOP_DEMO_USERNAME: demo
+      SHOP_DEMO_PASSWORD: demo123456
+    ports:
+      - "${SHOP_PORT:-8000}:8000"
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
