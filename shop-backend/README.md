@@ -27,7 +27,9 @@ uv run uvicorn app.server:app --port 8000
 
 打开 <http://127.0.0.1:8000>（Vue3 + Naive UI 构建产物已放在 `web/dist`，由后端托管）。
 接口健康检查：`curl http://127.0.0.1:8000/health`，就绪探针在 `/health/ready`（查数据库与 Redis）。
-代码结构与分层依据见 [`docs/DESIGN.md`](docs/DESIGN.md)。
+代码分四层：`domain` 放业务规则、`application` 放用例与端口、
+`infrastructure` 放 SQL / Redis / 支付物流适配器、`api` 只做 HTTP 翻译。
+依赖方向与取舍见 [`docs/DESIGN.md`](docs/DESIGN.md)。
 
 演示账号：`demo / demo123456`（普通用户）、`admin / admin123456`（管理员，只能由初始化脚本创建）。
 
@@ -82,7 +84,7 @@ Token 规则：Access 短期有效，Refresh 长期；刷新会轮换 Refresh
 ## 测试
 
 ```zsh
-uv run pytest -q            # 103 个用例，约 1 分钟（argon2 校验占大头）
+uv run pytest -q            # 107 个用例，约 1 分钟（argon2 校验占大头）
 uv run ruff check .
 ```
 

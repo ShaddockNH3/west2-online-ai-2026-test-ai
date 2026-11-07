@@ -8,56 +8,101 @@
 
 不做：真实支付、退款、多商家、售后、采购调拨盘点、报表平台。
 
-## 2. 代码结构
+## 2. 分层
 
 ```text
 app/
-├── main.py             应用工厂：配置、路由、中间件、生命周期
-├── server.py           uvicorn 入口（app = create_app()）
+├── main.py                 装配：配置、依赖登记、路由、中间件、生命周期
+├── container.py            组合根：把适配器注入应用服务
+├── server.py               uvicorn 入口
+├── domain/                 领域层：纯 Python，不 import 框架与 ORM
+│   ├── entities.py         实体与读模型
+│   ├── errors.py           领域异常（不含 HTTP 状态码）
+│   ├── money.py            金额换算、UTC 时间、ISO 序列化
+│   ├── pricing.py          选价：活动价与原价的取舍
+│   ├── ordering.py         订单状态机、可购买性判断、金额汇总、幂等指纹
+│   ├── inventory.py        履约状态迁移
+│   └── flashsale.py        时间窗、限购、名额
+├── application/
+│   ├── ports/              端口：仓储、工作单元、缓存、支付网关、物流、时钟
+│   ├── services/           用例：编排领域规则与端口
+│   └── read_models.py      列表/详情用的读模型
+├── infrastructure/
+│   ├── persistence/
+│   │   ├── models/         SQLAlchemy 表定义
+│   │   ├── repositories/   仓储实现，SQL 只在这里
+│   │   ├── mappers.py      行 → 实体
+│   │   └── uow.py          会话与事务
+│   ├── cache/redis.py      目录缓存
+│   ├── payment/mock.py     mock 支付网关
+│   ├── logistics/client.py mock 物流
+│   └── clock.py            系统时钟
 ├── api/
-│   ├── router.py       汇总注册各域路由
-│   └── routes/         各域 HTTP 处理：参数解析、鉴权、拼响应
-├── core/               横切关注点
-│   ├── config.py       环境变量与路径
-│   ├── db.py           引擎、会话、SQLite PRAGMA
-│   ├── cache.py        Redis 目录缓存（可选，未配置则直通）
-│   ├── security.py     argon2 与双 Token
-│   ├── errors.py       业务异常 + 统一异常处理器
-│   ├── params.py       请求体/查询参数解析
-│   ├── responses.py    统一响应结构
-│   └── logging.py      日志配置、请求 ID 中间件
-├── models/             按域拆的表定义，base 放 Base 与时间戳 Mixin
-├── schemas/            按域拆的请求模型，base 放 StrictModel
-├── services/           业务规则、事务边界、状态流转
-└── worker.py           任务分发与重试
+│   ├── routes/             HTTP 处理：解析参数、鉴权、调用用例
+│   ├── presenters.py       实体 → JSON（camelCase 只在这层出现）
+│   ├── errors.py           领域异常 → HTTP 状态码
+│   └── schemas/            pydantic 请求模型
+└── core/                   config、db、security、params、responses、logging
 ```
 
-拆分依据来自三处官方文档的共识，不是个人偏好：
+依赖方向是单向的：
 
-- **FastAPI「Bigger Applications」**：按业务功能划分子包，明确反对把所有 model 堆一起、所有路由堆一起；
-- **Flask 官方 Blueprints**：应用工厂负责装配，每个功能一个 blueprint，扩展集中初始化；
-- **BlackSheep MVC 模板**：`app/` 只放 Web 相关（controllers、static、views），领域模型放平级的 `domain/`，与框架解耦。
+```text
+api  ──▶ application ──▶ domain
+ │            │
+ └──▶ container ──▶ infrastructure ──▶ ports（实现）
+```
 
-社区实践（`fastapi-best-practices`，Netflix Dispatch 风格）更彻底，一个域一个目录，
-内含 `router.py` / `schemas.py` / `models.py` / `service.py`。本项目没走到那一步：
-`services/` 与 `routes/` 仍按同名域文件一一对应，跨域依赖显式 import，
-好处是事务边界一眼能看清，代价是文件多了一层目录跳转。
+- `domain` 谁都不依赖，规则可以直接单测，不需要数据库。
+- `application` 只认 `application/ports` 里的 Protocol，永远拿不到 `AsyncSession`。
+- `infrastructure` 实现端口；SQLAlchemy、Redis、mock 支付都关在这一层。
+- `api` 只做翻译：请求体 → 用例参数，实体 → JSON，领域异常 → 状态码。
+- `container.py` 是唯一知道「谁 new 谁」的地方，换实现只改它。
 
-三个具体取舍：
+### 端口与适配器
 
-1. **不用 src layout**。项目是单包、不发布到 PyPI，`app/` 直接作为顶层包更省事；
-   要发布时再迁到 `src/shop/`。
-2. **models 与 schemas 拆包但保留 `__init__` 重导出**。外部仍然
-   `from app.models import Order`，内部文件按域拆开；迁移成本低，也不会让调用方跟着改。
-3. **只做一层接口，不加 `/api/v1` 前缀**。考核文档给定的是 `/auth/login`、`/orders`
-   这类路径，加版本前缀反而与文档不一致；真要版本化，用 `router.include_router` 挂两次即可。
+| 端口 | 适配器 | 作用 |
+| --- | --- | --- |
+| `UserRepository` 等 10 个仓储 | `infrastructure/persistence/repositories/*` | 所有 SQL 与事务内的原子更新 |
+| `UnitOfWork` | `SqlAlchemyUnitOfWork` | 一个用例一个会话，提交与回滚 |
+| `CachePort` | `RedisCache` | 商品目录读缓存，未配置时直通 |
+| `PaymentGateway` | `MockPaymentGateway` | 支付渠道；换真渠道是实现类替换 |
+| `LogisticsPort` | `MockLogistics` | 发货；失败抛 `ShipmentError` 由用例转成 502 |
+| `Clock` | `SystemClock` | 时间是外部依赖，测试可替换 |
 
-路由里每个写操作都是 `async with db.session()`，服务层负责 `commit`。异常向上抛，由统一异常处理器转 JSON；
-未提交的事务在会话关闭时回滚，所以「库存扣了但订单没建」不会发生。
+### 一次下单的调用链
 
-`require_principal` 每次请求查一次会话 + 用户（一条 join），
-既校验 JWT 签名与过期，也校验会话是否被退出/改密撤销。
-角色以数据库为准，不信 token 里的 role。
+```text
+POST /orders
+  → routes/orders.py           解析请求、校验登录
+  → OrderService.create        用例：幂等检查、计价、落单、占库存、投任务
+      → uow.orders / uow.cart / uow.inventory   仓储接口
+      → domain.ordering.evaluate_line           纯规则
+  → SqlOrderRepository         真正的 INSERT / UPDATE
+  → presenters.order           拼响应
+```
+
+事务边界在用例里：`async with uow` 开一个会话，成功 `commit`，异常直接抛出，
+会话关闭时未提交的部分自动回滚，所以「库存扣了但订单没建」不会发生。
+
+### 错误映射
+
+领域层只表达「出了什么事」：`StockError`、`ConflictError`、`NotFoundError`。
+`api/errors.py` 按类型查表转状态码（400/401/403/404/409/502），换协议只改这一处。
+
+### 这么做的代价
+
+- 实体与 ORM 两套类型，加字段要同步改 `entities.py`、`models/`、`mappers.py`。
+- CRUD 也要写「接口 + 实现 + 映射」，比直接 `session.add` 多两跳。
+- 好处是业务规则能脱离数据库测，SQL 集中在一处，换存储不影响用例。
+
+三个仍然保留的取舍：
+
+1. **不用 src layout**。项目是单包、不发布到 PyPI，`app/` 直接作为顶层包更省事。
+2. **只做一层接口，不加 `/api/v1` 前缀**。考核文档给定的是 `/auth/login`、`/orders`
+   这类路径，加版本前缀反而与文档不一致。
+3. **读模型放在应用层而不是领域层**。`ProductCard`、`OrderPreview` 这类结构
+   只为展示服务，不参与业务规则，所以放 `application/read_models.py`。
 
 ## 3. 数据模型
 
@@ -134,7 +179,7 @@ app/
 ## 6. 活动选价
 
 同一 SKU 可能命中多个进行中的活动，取**当前时间窗内、状态 ACTIVE、价格最低**的那个；
-活动价高于原价时按原价卖。商详、购物车、预览、下单都走同一个 `resolve_price`，
+活动价高于原价时按原价卖。商详、购物车、预览、下单都走同一个 `domain.pricing.quote`，
 不会出现「详情页 34 元、结算 39 元」。
 
 ## 7. 取舍
@@ -144,7 +189,8 @@ app/
   实测换成 Docker 里的 MySQL 8.4 并没有更快——小事务每次提交落盘的成本比
   WAL + `synchronous=NORMAL` 更高，瓶颈在事务本身而不在数据库品牌。
 - **不用 ORM 关系**：全部显式查询，避免异步下的隐式懒加载；代价是查询代码略长。
-- **不用 Redis**：没引入缓存和分布式锁，所有一致性靠数据库条件更新与唯一约束。以这个项目的并发量够用。
+- **Redis 只做目录缓存**：不用分布式锁，一致性仍靠数据库条件更新与唯一约束；
+  缓存未配置时完全直通，测试不依赖它。
 - **前端只做控制台**：不追求视觉，覆盖完整链路，方便答辩时点着走。
 
 ## 7.1 目录缓存
@@ -178,4 +224,9 @@ app/
 `pytest` 每个用例一个独立 SQLite 文件，走真实 HTTP 层（BlackSheep TestClient），
 只对时间与后台任务做显式驱动（把 `next_run_at` 提前、手动 `run_once`）。
 
-重点覆盖「不应该发生」的情况：越权、重复提交、重复支付、已取消再支付、并发超卖、任务失败后重试、重启后任务还在。
+重点覆盖「不应该发生」的情况：越权、重复提交、重复支付、已取消再支付、
+并发超卖、任务失败后重试、重启后任务还在。
+
+`tests/test_architecture.py` 用 AST 检查依赖方向：`domain` 不许 import 任何框架，
+`application` 不许 import `infrastructure`，`api` 不许直接 import 适配器。
+有人图省事在领域层查一次数据库，这几个用例会立刻红。
