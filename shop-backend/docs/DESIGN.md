@@ -8,16 +8,52 @@
 
 不做：真实支付、退款、多商家、售后、采购调拨盘点、报表平台。
 
-## 2. 分层
+## 2. 代码结构
 
 ```text
-routes/    参数解析、鉴权、拼响应（不做业务判断）
-services/  业务规则、事务边界、状态流转
-models.py  表结构；金额一律整数分，时间一律 naive UTC
-worker.py  任务分发与重试
+app/
+├── main.py             应用工厂：配置、路由、中间件、生命周期
+├── server.py           uvicorn 入口（app = create_app()）
+├── api/
+│   ├── router.py       汇总注册各域路由
+│   └── routes/         各域 HTTP 处理：参数解析、鉴权、拼响应
+├── core/               横切关注点
+│   ├── config.py       环境变量与路径
+│   ├── db.py           引擎、会话、SQLite PRAGMA
+│   ├── cache.py        Redis 目录缓存（可选，未配置则直通）
+│   ├── security.py     argon2 与双 Token
+│   ├── errors.py       业务异常 + 统一异常处理器
+│   ├── params.py       请求体/查询参数解析
+│   ├── responses.py    统一响应结构
+│   └── logging.py      日志配置、请求 ID 中间件
+├── models/             按域拆的表定义，base 放 Base 与时间戳 Mixin
+├── schemas/            按域拆的请求模型，base 放 StrictModel
+├── services/           业务规则、事务边界、状态流转
+└── worker.py           任务分发与重试
 ```
 
-路由里每个写操作都是 `async with db.session()`，服务层负责 `commit`。异常向上抛，由统一异常处理器转 JSON；未提交的事务在会话关闭时回滚，所以「库存扣了但订单没建」不会发生。
+拆分依据来自三处官方文档的共识，不是个人偏好：
+
+- **FastAPI「Bigger Applications」**：按业务功能划分子包，明确反对把所有 model 堆一起、所有路由堆一起；
+- **Flask 官方 Blueprints**：应用工厂负责装配，每个功能一个 blueprint，扩展集中初始化；
+- **BlackSheep MVC 模板**：`app/` 只放 Web 相关（controllers、static、views），领域模型放平级的 `domain/`，与框架解耦。
+
+社区实践（`fastapi-best-practices`，Netflix Dispatch 风格）更彻底，一个域一个目录，
+内含 `router.py` / `schemas.py` / `models.py` / `service.py`。本项目没走到那一步：
+`services/` 与 `routes/` 仍按同名域文件一一对应，跨域依赖显式 import，
+好处是事务边界一眼能看清，代价是文件多了一层目录跳转。
+
+三个具体取舍：
+
+1. **不用 src layout**。项目是单包、不发布到 PyPI，`app/` 直接作为顶层包更省事；
+   要发布时再迁到 `src/shop/`。
+2. **models 与 schemas 拆包但保留 `__init__` 重导出**。外部仍然
+   `from app.models import Order`，内部文件按域拆开；迁移成本低，也不会让调用方跟着改。
+3. **只做一层接口，不加 `/api/v1` 前缀**。考核文档给定的是 `/auth/login`、`/orders`
+   这类路径，加版本前缀反而与文档不一致；真要版本化，用 `router.include_router` 挂两次即可。
+
+路由里每个写操作都是 `async with db.session()`，服务层负责 `commit`。异常向上抛，由统一异常处理器转 JSON；
+未提交的事务在会话关闭时回滚，所以「库存扣了但订单没建」不会发生。
 
 `require_principal` 每次请求查一次会话 + 用户（一条 join），
 既校验 JWT 签名与过期，也校验会话是否被退出/改密撤销。

@@ -26,7 +26,8 @@ uv run uvicorn app.server:app --port 8000
 ```
 
 打开 <http://127.0.0.1:8000>（Vue3 + Naive UI 构建产物已放在 `web/dist`，由后端托管）。
-接口健康检查：`curl http://127.0.0.1:8000/health`。
+接口健康检查：`curl http://127.0.0.1:8000/health`，就绪探针在 `/health/ready`（查数据库与 Redis）。
+代码结构与分层依据见 [`docs/DESIGN.md`](docs/DESIGN.md)。
 
 演示账号：`demo / demo123456`（普通用户）、`admin / admin123456`（管理员，只能由初始化脚本创建）。
 
