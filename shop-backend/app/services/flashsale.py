@@ -11,7 +11,7 @@ from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.constants import FlashSaleStatus, JobType, ProductStatus
-from app.errors import ConflictError, NotFoundError, StockError, ValidationError
+from app.core.errors import ConflictError, NotFoundError, StockError, ValidationError
 from app.models import (
     Activity,
     ActivitySku,

@@ -8,7 +8,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.constants import FulfillmentStatus, OrderStatus
-from app.errors import ConflictError, ExternalServiceError, NotFoundError
+from app.core.errors import ConflictError, ExternalServiceError, NotFoundError
 from app.mock_logistics import LogisticsError, create_shipment
 from app.models import Fulfillment, Order, OrderItem
 from app.utils import iso, utcnow

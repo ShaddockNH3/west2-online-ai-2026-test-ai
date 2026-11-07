@@ -6,7 +6,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.constants import ProductStatus
-from app.errors import ConflictError, NotFoundError
+from app.core.errors import ConflictError, NotFoundError
 from app.models import CartItem, Product, Sku
 from app.services import inventory as inventory_service
 from app.services.pricing import active_rules, resolve_price

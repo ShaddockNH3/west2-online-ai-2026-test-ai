@@ -12,9 +12,10 @@ from datetime import timedelta
 
 from sqlalchemy import select
 
-from app.config import get_settings
 from app.constants import DEFAULT_WAREHOUSE_ID, ActivityStatus, ActivityType, Role
-from app.db import db
+from app.core.config import get_settings
+from app.core.db import db
+from app.core.security import hash_password
 from app.models import (
     Activity,
     ActivitySku,
@@ -25,7 +26,6 @@ from app.models import (
     User,
     Warehouse,
 )
-from app.security import hash_password
 from app.services import inventory as inventory_service
 from app.utils import utcnow
 

@@ -6,9 +6,9 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cache import cache, catalog_key
 from app.constants import CategoryStatus, ProductStatus
-from app.errors import ConflictError, NotFoundError, ValidationError
+from app.core.cache import cache, catalog_key
+from app.core.errors import ConflictError, NotFoundError, ValidationError
 from app.models import Category, Product, Sku
 from app.schemas import CategoryIn, CategoryPatch, ProductIn, ProductPatch, SkuIn, SkuPatch
 from app.services import inventory as inventory_service

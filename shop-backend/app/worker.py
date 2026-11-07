@@ -6,7 +6,7 @@ import asyncio
 import logging
 
 from app.constants import JobStatus, JobType
-from app.db import db
+from app.core.db import db
 from app.models import Job
 from app.services import flashsale, fulfillment, jobs
 from app.services import orders as order_service

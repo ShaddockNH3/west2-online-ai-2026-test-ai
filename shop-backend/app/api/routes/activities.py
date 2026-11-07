@@ -5,10 +5,10 @@ from __future__ import annotations
 from blacksheep import Request
 from blacksheep.server.routing import Router
 
-from app.db import db
+from app.core.db import db
+from app.core.params import read_body
+from app.core.responses import ok
 from app.deps import require_admin
-from app.params import read_body
-from app.responses import ok
 from app.schemas import ActivityIn, ActivityPatch
 from app.services import activities as activity_service
 

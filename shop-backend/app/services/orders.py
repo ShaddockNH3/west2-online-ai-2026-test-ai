@@ -10,9 +10,9 @@ from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
 from app.constants import JobType, OrderStatus, ProductStatus
-from app.errors import ConflictError, NotFoundError, StockError, ValidationError
+from app.core.config import get_settings
+from app.core.errors import ConflictError, NotFoundError, StockError, ValidationError
 from app.models import (
     Address,
     CartItem,

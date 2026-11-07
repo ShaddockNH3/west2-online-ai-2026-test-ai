@@ -5,9 +5,9 @@ from __future__ import annotations
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cache import cache
 from app.constants import DEFAULT_WAREHOUSE_ID, InventoryChange
-from app.errors import NotFoundError
+from app.core.cache import cache
+from app.core.errors import NotFoundError
 from app.models import Inventory, InventoryLog, Product, Sku
 from app.utils import iso, utcnow
 

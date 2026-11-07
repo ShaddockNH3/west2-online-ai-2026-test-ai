@@ -5,7 +5,7 @@ from __future__ import annotations
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.errors import NotFoundError
+from app.core.errors import NotFoundError
 from app.models import Address
 from app.schemas import AddressIn, AddressPatch
 from app.utils import iso

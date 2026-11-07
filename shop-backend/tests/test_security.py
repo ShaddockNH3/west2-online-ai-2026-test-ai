@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from app.config import get_settings
-from app.security import encode_token
+from app.core.config import get_settings
+from app.core.security import encode_token
 from tests.helpers import Api
 
 

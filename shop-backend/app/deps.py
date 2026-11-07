@@ -7,12 +7,12 @@ from dataclasses import dataclass
 from blacksheep import Request
 from sqlalchemy import select
 
-from app.config import get_settings
 from app.constants import Role, UserStatus
-from app.db import db
-from app.errors import AuthError, PermissionDenied
+from app.core.config import get_settings
+from app.core.db import db
+from app.core.errors import AuthError, PermissionDenied
+from app.core.security import ACCESS, decode_token
 from app.models import AuthSession, User
-from app.security import ACCESS, decode_token
 from app.utils import utcnow
 
 

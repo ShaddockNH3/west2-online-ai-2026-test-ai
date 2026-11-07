@@ -7,7 +7,7 @@ from datetime import timedelta
 from sqlalchemy import select, update
 
 from app.constants import JobStatus
-from app.db import db
+from app.core.db import db
 from app.models import Job, Order
 from app.services import jobs as job_service
 from app.utils import utcnow

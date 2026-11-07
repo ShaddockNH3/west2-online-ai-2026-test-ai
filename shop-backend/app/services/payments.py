@@ -6,7 +6,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.constants import JobType, OrderStatus, PaymentStatus
-from app.errors import ConflictError
+from app.core.errors import ConflictError
 from app.models import Order, OrderItem, Payment
 from app.services import inventory as inventory_service
 from app.services import jobs

@@ -1,73 +1,22 @@
-"""应用工厂：路由、异常处理、生命周期与静态页面。"""
+"""应用工厂：只负责把配置、路由、中间件和生命周期拼起来。
+
+业务逻辑在 services，HTTP 处理在 api/routes，横切关注点在 core。
+"""
 
 from __future__ import annotations
 
-import logging
-
 from blacksheep import Application, Request
-from blacksheep.exceptions import HTTPException
 from blacksheep.server.responses import json
 from blacksheep.server.routing import Router
+from sqlalchemy import text
 
-from app.cache import cache
-from app.config import Settings, get_settings
-from app.db import db
-from app.errors import AppError
-from app.routes import (
-    activities,
-    addresses,
-    admin,
-    auth,
-    cart,
-    catalog,
-    flashsale,
-    orders,
-    users,
-)
+from app.api.router import register_routes
+from app.core.cache import cache
+from app.core.config import Settings, get_settings
+from app.core.db import db
+from app.core.errors import register_exception_handlers
+from app.core.logging import configure_logging, request_context_middleware
 from app.worker import WorkerPool, recover
-
-
-def configure_logging(settings: Settings) -> None:
-    logging.basicConfig(
-        level=getattr(logging, settings.log_level.upper(), logging.INFO),
-        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
-    )
-    # 框架访问日志里不带请求体，避免密码等敏感信息落盘
-    logging.getLogger("blacksheep").setLevel(logging.WARNING)
-
-
-def register_routes(router: Router) -> None:
-    auth.register(router)
-    users.register(router)
-    addresses.register(router)
-    catalog.register(router)
-    cart.register(router)
-    orders.register(router)
-    activities.register(router)
-    flashsale.register(router)
-    admin.register(router)
-
-
-def register_exception_handlers(app: Application) -> None:
-    @app.exception_handler(AppError)
-    async def handle_app_error(application, request, exc: AppError):  # type: ignore[no-untyped-def]
-        payload = {"code": exc.code, "message": exc.message}
-        if exc.details is not None:
-            payload["details"] = exc.details
-        return json(payload, status=exc.status_code)
-
-    @app.exception_handler(HTTPException)
-    async def handle_http_error(application, request, exc: HTTPException):  # type: ignore[no-untyped-def]
-        return json(
-            {"code": "HTTP_ERROR", "message": str(exc.message or "请求失败")},
-            status=exc.status,
-        )
-
-    @app.exception_handler(Exception)
-    async def handle_unexpected(application, request, exc: Exception):  # type: ignore[no-untyped-def]
-        logging.getLogger("app").exception("unhandled error on %s %s", request.method, request.path)
-        # 对外只给通用描述，堆栈留在日志里
-        return json({"code": "INTERNAL_ERROR", "message": "服务器内部错误，请稍后重试"}, status=500)
 
 
 def create_app(settings: Settings | None = None, *, start_worker: bool = True) -> Application:
@@ -77,6 +26,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True) -
 
     router = Router()
     app = Application(router=router, show_error_details=False)
+    app.middlewares.append(request_context_middleware)
     register_routes(router)
     register_exception_handlers(app)
 
@@ -99,9 +49,34 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True) -
             await pool.stop()
         await cache.close()
 
-    @app.router.get("/health")
+    @router.get("/health")
     async def health(request: Request):
+        """存活探针：进程起来了就返回 200，不碰数据库。"""
         return json({"status": "ok", "app": settings.app_name, "env": settings.env})
+
+    @router.get("/health/ready")
+    async def ready(request: Request):
+        """就绪探针：数据库不通或 Redis 挂了返回 503，方便编排系统摘流量。"""
+        database_ok = True
+        try:
+            async with db.session() as session:
+                await session.execute(text("SELECT 1"))
+        except Exception:  # noqa: BLE001 - 探针不能抛异常
+            database_ok = False
+
+        redis_state = "disabled"
+        if cache.enabled:
+            redis_state = "ok" if await cache.ping() else "down"
+
+        healthy = database_ok and redis_state != "down"
+        return json(
+            {
+                "status": "ok" if healthy else "degraded",
+                "database": "ok" if database_ok else "down",
+                "redis": redis_state,
+            },
+            status=200 if healthy else 503,
+        )
 
     if settings.web_dir.exists() and (settings.web_dir / "index.html").exists():
         app.serve_files(
@@ -109,7 +84,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True) -
         )
     else:
 
-        @app.router.get("/")
+        @router.get("/")
         async def index(request: Request):
             return json(
                 {

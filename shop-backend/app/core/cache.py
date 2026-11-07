@@ -45,6 +45,15 @@ class Cache:
             await self._client.aclose()
             self._client = None
 
+    async def ping(self) -> bool:
+        """给 /health/ready 用：Redis 不可用时返回 False，但不抛异常。"""
+        if self._client is None:
+            return False
+        try:
+            return bool(await self._client.ping())
+        except Exception:  # noqa: BLE001
+            return False
+
     async def version(self, namespace: str) -> int:
         if self._client is None:
             return 0

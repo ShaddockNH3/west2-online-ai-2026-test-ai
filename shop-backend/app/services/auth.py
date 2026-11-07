@@ -9,18 +9,24 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
 from app.constants import Role, UserStatus
-from app.errors import AuthError, ConflictError, NotFoundError, PermissionDenied, ValidationError
-from app.models import AuthSession, User
-from app.schemas import ChangePasswordIn, LoginIn, RefreshIn, RegisterIn, UpdateMeIn
-from app.security import (
+from app.core.config import get_settings
+from app.core.errors import (
+    AuthError,
+    ConflictError,
+    NotFoundError,
+    PermissionDenied,
+    ValidationError,
+)
+from app.core.security import (
     REFRESH,
     encode_token,
     hash_password,
     validate_password_strength,
     verify_password,
 )
+from app.models import AuthSession, User
+from app.schemas import ChangePasswordIn, LoginIn, RefreshIn, RegisterIn, UpdateMeIn
 from app.utils import iso, utcnow
 
 
@@ -111,7 +117,7 @@ async def login(session: AsyncSession, data: LoginIn, user_agent: str = "") -> d
 
 
 async def refresh_tokens(session: AsyncSession, data: RefreshIn, user_agent: str = "") -> dict:
-    from app.security import decode_token
+    from app.core.security import decode_token
 
     settings = get_settings()
     claims = decode_token(data.refreshToken, expected_type=REFRESH, secret=settings.jwt_secret)

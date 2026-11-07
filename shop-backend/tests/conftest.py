@@ -5,8 +5,8 @@ from __future__ import annotations
 import pytest
 from blacksheep.testing import TestClient
 
-from app.config import reset_settings_cache
-from app.db import db
+from app.core.config import reset_settings_cache
+from app.core.db import db
 
 
 @pytest.fixture

@@ -9,9 +9,9 @@ from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
 from app.constants import JobStatus
-from app.errors import NotFoundError
+from app.core.config import get_settings
+from app.core.errors import NotFoundError
 from app.models import Job
 from app.utils import iso, utcnow
 
